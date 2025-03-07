@@ -1,54 +1,53 @@
 package com.example.EmployeePayrollApp.controller;
 import com.example.EmployeePayrollApp.model.Employee;
+import com.example.EmployeePayrollApp.service.EmployeeService;
 import com.example.EmployeePayrollApp.dto.EmployeeDTO;
 import com.example.EmployeePayrollApp.repository.EmployeeRepository;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/employees")
 public class EmployeeController {
-    private final EmployeeRepository employeeRepository;
+    private final EmployeeService employeeService;
 
-    public EmployeeController(EmployeeRepository employeeRepository) {
-        this.employeeRepository = employeeRepository;
+    @Autowired
+    public EmployeeController(EmployeeService employeeService) {
+        this.employeeService = employeeService;
     }
 
     // GET: Fetch all employees
     @GetMapping
     public List<Employee> getAllEmployees() {
-        return employeeRepository.findAll();
+        return employeeService.getAllEmployees();
     }
 
     // GET: Fetch employee by ID
     @GetMapping("/{id}")
-    public Employee getEmployeeById(@PathVariable Long id) {
-        return employeeRepository.findById(id).orElse(null);
+    public Optional<Employee> getEmployeeById(@PathVariable Long id) {
+        return employeeService.getEmployeeById(id);
     }
 
-    // POST: Add a new employee using DTO
+    // POST: Add a new employee
     @PostMapping
-    public Employee createEmployee(@RequestBody EmployeeDTO employeeDTO) {
-        Employee employee = new Employee();
-        employee.setName(employeeDTO.getName());
-        employee.setSalary(employeeDTO.getSalary());
-        return employeeRepository.save(employee);
+    public Employee createEmployee(@RequestBody Employee employee) {
+        return employeeService.createEmployee(employee);
     }
 
-    // PUT: Update an employee using DTO
+    // PUT: Update an employee
     @PutMapping("/{id}")
-    public Employee updateEmployee(@PathVariable Long id, @RequestBody EmployeeDTO employeeDTO) {
-        return employeeRepository.findById(id).map(employee -> {
-            employee.setName(employeeDTO.getName());
-            employee.setSalary(employeeDTO.getSalary());
-            return employeeRepository.save(employee);
-        }).orElse(null);
+    public Optional<Employee> updateEmployee(@PathVariable Long id, @RequestBody Employee updatedEmployee) {
+        return employeeService.updateEmployee(id, updatedEmployee);
     }
 
     // DELETE: Remove an employee
     @DeleteMapping("/{id}")
     public void deleteEmployee(@PathVariable Long id) {
-        employeeRepository.deleteById(id);
+        employeeService.deleteEmployee(id);
     }
 }
