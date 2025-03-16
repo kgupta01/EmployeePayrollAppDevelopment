@@ -18,11 +18,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
-        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-            errors.put(error.getField(), error.getDefaultMessage());
+
+        if (!ex.getBindingResult().getFieldErrors().isEmpty()) {
+            FieldError firstError = ex.getBindingResult().getFieldErrors().get(0); // Get only the first error
+            errors.put(firstError.getField(), firstError.getDefaultMessage());
         }
+
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
+
+
 
     // Handles Employee Not Found Exception
     @ExceptionHandler(EmployeeNotFoundException.class)

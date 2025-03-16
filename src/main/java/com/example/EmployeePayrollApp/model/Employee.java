@@ -1,3 +1,4 @@
+
 package com.example.EmployeePayrollApp.model;
 
 import jakarta.persistence.*;

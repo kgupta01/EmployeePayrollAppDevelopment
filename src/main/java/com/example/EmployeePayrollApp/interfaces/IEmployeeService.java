@@ -1,3 +1,4 @@
+
 package com.example.EmployeePayrollApp.interfaces;
 
 import com.example.EmployeePayrollApp.dto.EmployeeDTO;
