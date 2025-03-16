@@ -1,22 +1,18 @@
 package com.example.EmployeePayrollApp.service;
 
-import com.example.EmployeePayrollApp.controller.EmployeeController;
+import com.example.EmployeePayrollApp.dto.EmployeeDTO;
 import com.example.EmployeePayrollApp.model.Employee;
 import com.example.EmployeePayrollApp.repository.EmployeeRepository;
 import com.example.EmployeePayrollApp.interfaces.IEmployeeService;
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class EmployeeService implements IEmployeeService {
-    private static final Logger log = LoggerFactory.getLogger(EmployeeService.class);
+
     private final EmployeeRepository employeeRepository;
 
     @Autowired
@@ -26,36 +22,44 @@ public class EmployeeService implements IEmployeeService {
 
     @Override
     public List<Employee> getAllEmployees() {
-        log.info("Retrieving all employees from database");
         return employeeRepository.findAll();
     }
 
     @Override
     public Optional<Employee> getEmployeeById(Long id) {
-        log.info("Fetching employee with ID: {}", id);
         return employeeRepository.findById(id);
     }
 
     @Override
-    public Employee createEmployee(Employee employee) {
-        log.info("Saving new employee: {}", employee);
+    public Employee createEmployee(EmployeeDTO employeeDTO) {
+        Employee employee = new Employee();
+        employee.setName(employeeDTO.getName());
+        employee.setSalary(employeeDTO.getSalary());
+        employee.setDepartment(employeeDTO.getDepartment());
         return employeeRepository.save(employee);
     }
 
     @Override
-    public Optional<Employee> updateEmployee(Long id, Employee updatedEmployee) {
-        return employeeRepository.findById(id).map(employee -> {
-            log.info("Updating employee with ID: {}", id);
-            employee.setName(updatedEmployee.getName());
-            employee.setDepartment(updatedEmployee.getDepartment());
-            employee.setSalary(updatedEmployee.getSalary());
-            return employeeRepository.save(employee);
-        });
+    public Optional<Employee> updateEmployee(Long id, EmployeeDTO updatedEmployeeDTO) {
+        Optional<Employee> existingEmployee = employeeRepository.findById(id);
+
+        if (existingEmployee.isPresent()) {
+            Employee employee = existingEmployee.get();
+            employee.setName(updatedEmployeeDTO.getName());
+            employee.setSalary(updatedEmployeeDTO.getSalary());
+            employee.setDepartment(updatedEmployeeDTO.getDepartment());
+            employeeRepository.save(employee);
+            return Optional.of(employee);
+        }
+        return Optional.empty();
     }
 
     @Override
-    public void deleteEmployee(Long id) {
-        log.warn("Deleting employee with ID: {}", id);
-        employeeRepository.deleteById(id);
+    public boolean deleteEmployee(Long id) {
+        if (employeeRepository.existsById(id)) {
+            employeeRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 }
