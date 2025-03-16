@@ -1,6 +1,7 @@
 package com.example.EmployeePayrollApp.service;
 
 import com.example.EmployeePayrollApp.dto.EmployeeDTO;
+import com.example.EmployeePayrollApp.customExceptions.EmployeeNotFoundException;
 import com.example.EmployeePayrollApp.model.Employee;
 import com.example.EmployeePayrollApp.repository.EmployeeRepository;
 import com.example.EmployeePayrollApp.interfaces.IEmployeeService;
@@ -27,7 +28,8 @@ public class EmployeeService implements IEmployeeService {
 
     @Override
     public Optional<Employee> getEmployeeById(Long id) {
-        return employeeRepository.findById(id);
+        return Optional.ofNullable(employeeRepository.findById(id)
+                .orElseThrow(() -> new EmployeeNotFoundException(id))); // Throw custom exception
     }
 
     @Override
@@ -50,16 +52,17 @@ public class EmployeeService implements IEmployeeService {
             employee.setDepartment(updatedEmployeeDTO.getDepartment());
             employeeRepository.save(employee);
             return Optional.of(employee);
+        } else {
+            throw new EmployeeNotFoundException(id);  // Throw exception if employee not found
         }
-        return Optional.empty();
     }
 
     @Override
     public boolean deleteEmployee(Long id) {
-        if (employeeRepository.existsById(id)) {
-            employeeRepository.deleteById(id);
-            return true;
+        if (!employeeRepository.existsById(id)) {
+            throw new EmployeeNotFoundException(id);  // Throw exception if employee not found
         }
-        return false;
+        employeeRepository.deleteById(id);
+        return true;
     }
 }
